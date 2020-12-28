@@ -1,29 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FileBase from "react-file-base64";
 import { TextField, Button, Typography, Paper } from "@material-ui/core";
 import useStyles from "./styles";
 import {useDispatch} from 'react-redux';
-import {createPost} from '../../actions/posts';
-import { createStore } from "redux";
-const Form = () => {
-  const [postData, setPostData] = useState({
-    creator: "",
-    title: "",
-    message: "",
-    tags: "",
-    selectedFile: "",
-  });
+import {createPost, updatePost} from '../../Redux/actions/posts'; 
+import {useSelector} from 'react-redux';
+
+const initialState = {
+  creator: "",
+  title: "",
+  message: "",
+  tags: "",
+  selectedFile: "",
+};
+const Form = ({currentId, setCurrentId}) => {
+  const post = useSelector((state) => currentId ? state.posts.find(p => p._id === currentId) : null)
+  const [postData, setPostData] = useState(initialState);
   const classes = useStyles();
   const dispatch = useDispatch()
   const handleSubmit = (e) => {
-    console.log('hiiiiiii')
     e.preventDefault();
-    dispatch(createPost(postData))
+    console.log(postData, 'postData')
+    currentId ? (   dispatch(updatePost(currentId, postData))) : (   dispatch(createPost(postData)))
+    clear()
   };
-  const clear = () => {}
+  useEffect(() => {
+    if(post) setPostData(post)
+  }, [post])
+  const clear = () => {
+    setCurrentId(null);
+    setPostData(initialState)
+  }
   return (
     <Paper className={classes.paper}>
-      <Typography variant="h6">Pendown your thoughts</Typography>
+      <Typography variant="h6">{currentId ? "Edit your pens" : "Pendown your thoughts"}</Typography>
       <form
         autoComplete="off"
         noValidate
@@ -64,7 +74,7 @@ const Form = () => {
           label="Tags"
           fullWidth
           value={postData.tags}
-          onChange={(e) => setPostData({ ...postData, tags: e.target.value })}
+          onChange={(e) => setPostData({ ...postData, tags: e.target.value.split(',') })}
         />
         <div className={classes.fileInput}>
           <FileBase
