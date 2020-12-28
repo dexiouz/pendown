@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import FileBase from "react-file-base64";
 import { TextField, Button, Typography, Paper } from "@material-ui/core";
 import useStyles from "./styles";
-import {useDispatch} from 'react-redux';
-import {createPost, updatePost} from '../../Redux/actions/posts'; 
-import {useSelector} from 'react-redux';
+import { useDispatch } from "react-redux";
+import { createPost, updatePost } from "../../Redux/actions/posts";
+import { useSelector } from "react-redux";
 
 const initialState = {
   creator: "",
@@ -13,27 +13,36 @@ const initialState = {
   tags: "",
   selectedFile: "",
 };
-const Form = ({currentId, setCurrentId}) => {
-  const post = useSelector((state) => currentId ? state.posts.find(p => p._id === currentId) : null)
+const Form = ({ currentId, setCurrentId }) => {
+  const post = useSelector((state) =>
+    currentId ? state.posts.find((p) => p._id === currentId) : null
+  );
   const [postData, setPostData] = useState(initialState);
   const classes = useStyles();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(postData, 'postData')
-    currentId ? (   dispatch(updatePost(currentId, postData))) : (   dispatch(createPost(postData)))
-    clear()
+    currentId
+      ? dispatch(updatePost(currentId, postData))
+      : dispatch(createPost(postData));
+    clear();
+  };
+  const disable = () => {
+    const { creator, title, message } = postData;
+    return !creator || !title || !message;
   };
   useEffect(() => {
-    if(post) setPostData(post)
-  }, [post])
+    if (post) setPostData(post);
+  }, [post]);
   const clear = () => {
     setCurrentId(null);
-    setPostData(initialState)
-  }
+    setPostData(initialState);
+  };
   return (
     <Paper className={classes.paper}>
-      <Typography variant="h6">{currentId ? "Edit your pens" : "Pendown your thoughts"}</Typography>
+      <Typography variant="h6">
+        {currentId ? "Edit your pens" : "Pendown your thoughts"}
+      </Typography>
       <form
         autoComplete="off"
         noValidate
@@ -74,7 +83,9 @@ const Form = ({currentId, setCurrentId}) => {
           label="Tags"
           fullWidth
           value={postData.tags}
-          onChange={(e) => setPostData({ ...postData, tags: e.target.value.split(',') })}
+          onChange={(e) =>
+            setPostData({ ...postData, tags: e.target.value.split(",") })
+          }
         />
         <div className={classes.fileInput}>
           <FileBase
@@ -92,11 +103,11 @@ const Form = ({currentId, setCurrentId}) => {
           size="large"
           type="submit"
           fullWidth
+          disabled={disable()}
         >
           Submit
         </Button>
         <Button
-          
           variant="contained"
           color="secondary"
           size="small"
